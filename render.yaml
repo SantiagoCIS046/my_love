@@ -2,7 +2,6 @@ services:
   - type: web
     name: my-love
     runtime: static
-    rootDir: Love
     buildCommand: npm install && npm run build
     static:
       path: dist
