@@ -64,24 +64,21 @@ function sellar() {
     <div class="paper contract fade-up">
       <header class="head">
         <div class="ornament">❦</div>
-        <h1 class="script-title">Contrato de Amor Eterno</h1>
+        <h1 class="script-title">Contrato de Amor</h1>
         <p class="meta">
-          Celebrado entre <strong>{{ config.herName }}</strong> y
-          <strong>{{ config.yourName }}</strong>, en el día de su aniversario,
-          ante el testigo silencioso del tiempo.
+          Celebrado entre mi amor y esa persona que te ama con todo el corazón, asumiendo el compromiso de construir una historia real juntos, un día a la vez.
         </p>
       </header>
 
       <ol class="clauses">
         <li v-for="(c, i) in clausulas" :key="i" class="clause">
           <span class="emoji">{{ c.emoji }}</span>
-          <span><em>Cláusula {{ i + 1 }}.</em> {{ c.texto }}</span>
+          <span><strong>Cláusula {{ i + 1 }}.</strong> {{ c.texto }}</span>
         </li>
       </ol>
 
       <p class="acceptance">
-        Quien firme este documento acepta amar sin condiciones,
-        reír sin miedo y construir recuerdos sin fin.
+        Quien firme este documento acepta que el verdadero amor se trabaja a diario, comprometiéndose a cuidar, respetar y caminar de la mano frente a todo lo que venga.
       </p>
 
       <!-- Zona de firma -->
@@ -142,7 +139,7 @@ h1 {
 
 .meta {
   margin: 14px auto 0;
-  max-width: 46ch;
+  max-width: 54ch;
   font-style: italic;
   font-size: clamp(0.95rem, 2.5vw, 1.05rem);
   color: var(--ink);

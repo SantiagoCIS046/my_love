@@ -27,11 +27,11 @@ export const frases = [
 ]
 
 export const clausulas = [
-  { texto: 'Amarse en las buenas, en las malas y en los lunes de madrugada.', emoji: '💗' },
-  { texto: 'Compartir la última porción de postre… aunque cueste.', emoji: '🍰' },
-  { texto: 'Bailar en la cocina aunque la canción sea mala.', emoji: '🎶' },
-  { texto: 'Perdonar rápido, abrazar más rápido todavía.', emoji: '🤗' },
-  { texto: 'Seguir eligiéndose, todos los días, otra vez.', emoji: '♾️' },
+  { texto: 'Acompañarnos tanto en los días donde todo fluye como en aquellos donde el estrés o el cansancio pesan, comprometiéndonos a ser siempre un espacio seguro y de calma para el otro.', emoji: '🕊️' },
+  { texto: 'Compartir las decisiones, los silencios cómodos y el peso de la rutina, entendiendo que el romance también se demuestra haciendo equipo en las tareas más simples de la vida diaria.', emoji: '🤝' },
+  { texto: 'Mantener la complicidad y el sentido del humor, recordando reírnos de nuestros propios errores y buscando momentos de conexión incluso cuando tengamos poco tiempo.', emoji: '✨' },
+  { texto: 'Hablar las cosas de frente y con empatía cuando haya molestias, eligiendo la honestidad y el diálogo antes que el orgullo, para nunca irnos a dormir sintiéndonos distantes.', emoji: '💬' },
+  { texto: 'Seguir eligiéndonos de manera consciente cada mañana, no porque seamos perfectos, sino porque sabemos que el esfuerzo de cuidarnos mutuamente y crecer juntos siempre vale la pena.', emoji: '♾️' },
 ]
 
 export const cartaFinal = [
