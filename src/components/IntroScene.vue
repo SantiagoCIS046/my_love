@@ -2,116 +2,143 @@
 import { ref } from 'vue'
 
 const emit = defineEmits(['start', 'next'])
-const zooming = ref(false)
+const volando = ref(false)
 
-// Escalera en perspectiva: sube de abajo-derecha hacia la luz del atardecer
-const steps = Array.from({ length: 16 }, (_, i) => {
-  const t = i / 15
+const lunaEl = ref(null)
+const luciernagas = ref([])
+
+// Estrellas deterministas (parpadeo natural)
+const stars = Array.from({ length: 80 }, (_, i) => {
+  const r = ((i * 9301 + 49297) % 233280) / 233280
+  const r2 = ((i * 4801 + 1723) % 10000) / 10000
   return {
-    x: 268 - t * 158,
-    y: 640 - t * 300,
-    w: 64 * (1 - t * 0.42),
-    h: 11 * (1 - t * 0.3),
-    o: (1 - t * 0.55).toFixed(2),
+    left: (r * 100).toFixed(2) + '%',
+    top: (r2 * 62).toFixed(2) + '%',
+    size: (1 + r2 * 2).toFixed(1) + 'px',
+    animationDelay: (r2 * 5).toFixed(2) + 's',
+    animationDuration: (2.5 + r * 4).toFixed(2) + 's',
   }
 })
 
-function agarrar() {
-  if (zooming.value) return
-  zooming.value = true
-  emit('start') // la app se prepara debajo mientras hacemos el zoom
-  setTimeout(() => emit('next'), 1500)
+function setLuci(el, i) {
+  luciernagas.value[i] = el
+}
+
+function tocar() {
+  if (volando.value) return
+  volando.value = true
+  emit('start') // la historia se prepara debajo del vuelo
+
+  let ultimo = 0
+  luciernagas.value.slice(0, 2).forEach((el, i) => {
+    ultimo = Math.max(ultimo, volarHaciaLaLuna(el, i * 450))
+  })
+
+  // La luna las recibe con un latido de luz y hacemos zoom hacia ella
+  setTimeout(() => {
+    if (lunaEl.value) lunaEl.value.classList.add('recibiendo')
+  }, ultimo - 250)
+
+  setTimeout(() => emit('next'), ultimo + 1250)
+}
+
+function volarHaciaLaLuna(el, delay) {
+  const luna = lunaEl.value.getBoundingClientRect()
+  const r = el.getBoundingClientRect()
+  const dx = luna.left + luna.width / 2 - (r.left + r.width / 2)
+  const dy = luna.top + luna.height / 2 - (r.top + r.height / 2)
+  const lado = dx > 0 ? 1 : -1
+  const duracion = 2400
+
+  // Fijar la posición actual del vagabundeo antes de soltar la animación,
+  // para que la luciérnaga despegue desde donde está y no salte
+  const actual = getComputedStyle(el).translate
+  el.style.animation = 'none'
+  el.style.transition = 'none'
+  if (actual && actual !== 'none' && actual !== 'auto') el.style.translate = actual
+  el.animate(
+    [
+      { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 0 },
+      { transform: `translate(${dx * 0.45 + lado * 70}px, ${dy * 0.5 - 100}px) scale(1.2)`, opacity: 1, offset: 0.5 },
+      { transform: `translate(${dx * 0.8 + lado * 18}px, ${dy * 0.85 + 10}px) scale(0.8)`, opacity: 1, offset: 0.82 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.15)`, opacity: 0, offset: 1 },
+    ],
+    { duration: duracion, delay, easing: 'cubic-bezier(0.45, 0.05, 0.35, 1)', fill: 'forwards' }
+  )
+  return delay + duracion
 }
 </script>
 
 <template>
-  <section class="intro" :class="{ zooming }" @click="agarrar">
-    <!-- ══ Paisaje original: atardecer con escaleras subiendo ══ -->
-    <svg class="landscape" viewBox="0 0 400 700" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <section class="intro" :class="{ volando }" @click="tocar" @touchstart.passive="tocar">
+    <!-- ══ Noche del bayou ══ -->
+    <div class="stars" aria-hidden="true">
+      <span v-for="(s, i) in stars" :key="i" class="star" :style="s"></span>
+    </div>
+
+    <div ref="lunaEl" class="luna" aria-hidden="true">
+      <span class="crater c1"></span>
+      <span class="crater c2"></span>
+      <span class="crater c3"></span>
+    </div>
+
+    <svg class="bayou" viewBox="0 0 400 720" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3b1757" />
-          <stop offset="30%" stop-color="#7a2560" />
-          <stop offset="55%" stop-color="#c14a63" />
-          <stop offset="75%" stop-color="#ef7d54" />
-          <stop offset="100%" stop-color="#ffb35c" />
+        <linearGradient id="agua" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#101a3e" />
+          <stop offset="100%" stop-color="#060a1e" />
         </linearGradient>
-        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fff3c4" stop-opacity="0.95" />
-          <stop offset="35%" stop-color="#ffcf87" stop-opacity="0.55" />
-          <stop offset="100%" stop-color="#ffcf87" stop-opacity="0" />
-        </radialGradient>
-        <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#6e2a4e" />
-          <stop offset="100%" stop-color="#521d3e" />
-        </linearGradient>
-        <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#46163a" />
-          <stop offset="100%" stop-color="#2d0e28" />
-        </linearGradient>
-        <linearGradient id="stepTop" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffc987" />
-          <stop offset="100%" stop-color="#e08a54" />
+        <linearGradient id="niebla" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8fa8d8" stop-opacity="0" />
+          <stop offset="100%" stop-color="#8fa8d8" stop-opacity="0.16" />
         </linearGradient>
       </defs>
 
-      <!-- Cielo -->
-      <rect width="400" height="700" fill="url(#sky)" />
+      <!-- Agua del bayou -->
+      <rect x="0" y="560" width="400" height="160" fill="url(#agua)" />
+      <!-- Reflejo de la luna -->
+      <ellipse cx="200" cy="575" rx="26" ry="5" fill="#f3e7c0" opacity="0.35" />
+      <ellipse cx="200" cy="592" rx="18" ry="3.5" fill="#f3e7c0" opacity="0.22" />
+      <ellipse cx="200" cy="608" rx="10" ry="2.5" fill="#f3e7c0" opacity="0.14" />
 
-      <!-- Sol poniente sobre el horizonte -->
-      <circle cx="150" cy="430" r="170" fill="url(#sunGlow)" />
-      <circle cx="150" cy="430" r="46" fill="#fff0bd" opacity="0.95" />
+      <!-- Niebla baja -->
+      <rect x="0" y="480" width="400" height="100" fill="url(#niebla)" />
 
-      <!-- Nubes suaves teñidas de dorado -->
-      <ellipse cx="90" cy="250" rx="90" ry="12" fill="#f2a06b" opacity="0.35" />
-      <ellipse cx="300" cy="200" rx="110" ry="10" fill="#e98a72" opacity="0.3" />
-      <ellipse cx="210" cy="310" rx="130" ry="9" fill="#ffbe7d" opacity="0.4" />
-      <ellipse cx="60" cy="150" rx="70" ry="8" fill="#c06a86" opacity="0.3" />
+      <!-- Copa del árbol izquierdo con musgo colgante -->
+      <path d="M-20 560 Q 30 400 95 370 Q 60 470 110 560 Z" fill="#0a1128" />
+      <path d="M20 420 Q 12 470 16 510" stroke="#0a1128" stroke-width="3" fill="none" opacity="0.9" />
+      <path d="M48 402 Q 44 455 50 505" stroke="#0a1128" stroke-width="2.5" fill="none" opacity="0.85" />
+      <path d="M75 395 Q 74 450 82 500" stroke="#0a1128" stroke-width="2" fill="none" opacity="0.8" />
 
-      <!-- Colinas lejanas -->
-      <path d="M0 460 Q 70 400 150 445 T 400 430 V 700 H 0 Z" fill="url(#hillFar)" opacity="0.85" />
+      <!-- Vegetación derecha -->
+      <path d="M420 560 Q 350 420 285 400 Q 330 480 280 560 Z" fill="#0a1128" />
+      <path d="M330 430 Q 340 480 336 530" stroke="#0a1128" stroke-width="3" fill="none" opacity="0.9" />
+      <path d="M305 415 Q 300 465 306 515" stroke="#0a1128" stroke-width="2.5" fill="none" opacity="0.85" />
 
-      <!-- Colina principal con la escalera -->
-      <path d="M0 520 Q 120 470 230 505 T 400 500 V 700 H 0 Z" fill="url(#hillNear)" />
-
-      <!-- Escaleras de piedra subiendo hacia la luz -->
-      <g v-for="(s, i) in steps" :key="i">
-        <rect :x="s.x" :y="s.y" :width="s.w" :height="s.h * 1.6" rx="2" fill="#2a0c24" :opacity="s.o" />
-        <rect :x="s.x" :y="s.y" :width="s.w" :height="s.h" rx="2" fill="url(#stepTop)" :opacity="s.o" />
-      </g>
-
-      <!-- Lado de la escalera: baranda de piedra simple -->
-      <path
-        d="M280 640 L 118 348"
-        stroke="#20081e"
-        stroke-width="7"
-        stroke-linecap="round"
-        opacity="0.9"
-        fill="none"
-      />
-
-      <!-- Vegetación en silueta -->
-      <path d="M0 700 Q 40 640 20 600 Q 60 650 70 700 Z" fill="#230a22" />
-      <path d="M400 700 Q 350 630 372 585 Q 330 655 322 700 Z" fill="#230a22" />
-      <path d="M310 700 Q 335 660 328 630 Q 355 672 358 700 Z" fill="#1c071c" />
+      <!-- Juncos -->
+      <path d="M60 600 Q 56 560 62 535" stroke="#0b1230" stroke-width="3" fill="none" stroke-linecap="round" />
+      <path d="M72 604 Q 70 566 78 545" stroke="#0b1230" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      <path d="M340 602 Q 346 562 340 540" stroke="#0b1230" stroke-width="3" fill="none" stroke-linecap="round" />
+      <path d="M326 606 Q 324 570 318 550" stroke="#0b1230" stroke-width="2.5" fill="none" stroke-linecap="round" />
     </svg>
 
-    <!-- ══ Contenido: las manos + la frase ══ -->
-    <div class="veil" aria-hidden="true"></div>
+    <!-- ══ Las dos luciérnagas ══ -->
+    <div class="luci l1" :ref="(el) => setLuci(el, 0)" aria-hidden="true">
+      <span class="alas"><i></i><i></i></span>
+      <span class="cuerpo"></span>
+      <span class="halo"></span>
+    </div>
+    <div class="luci l2" :ref="(el) => setLuci(el, 1)" aria-hidden="true">
+      <span class="alas"><i></i><i></i></span>
+      <span class="cuerpo"></span>
+      <span class="halo"></span>
+    </div>
 
-    <div class="content fade-up">
-      <button class="hands-btn" aria-label="Agárrame de la mano" @click.stop="agarrar">
-        <span class="hands-glow" aria-hidden="true"></span>
-        <img
-          class="hands"
-          src="/photos/manos.jpg"
-          alt="Dos manos morenas tomadas de la mano al atardecer"
-        />
-        <span class="tap-hint" aria-hidden="true">tócalas&nbsp;✦</span>
-      </button>
-
+    <!-- ══ Invitación ══ -->
+    <div class="content">
       <h1 class="invite script-title">Agárrame de la mano,</h1>
       <p class="invite-sub">aquí empieza nuestra historia</p>
+      <p class="tap-hint">toca la pantalla&nbsp;✦</p>
     </div>
   </section>
 </template>
@@ -122,163 +149,249 @@ function agarrar() {
   inset: 0;
   z-index: 50;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   overflow: hidden;
   cursor: pointer;
-  background: #3b1757;
-  /* Zoom cinematográfico hacia el atardecer */
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(90, 110, 190, 0.18) 0%, transparent 55%),
+    linear-gradient(180deg, #060a20 0%, #0c1334 40%, #16204a 68%, #101a3e 100%);
+  /* Zoom final hacia la luna */
   transition:
-    transform 1.5s cubic-bezier(0.4, 0, 0.2, 1),
-    filter 1.4s ease-in,
-    opacity 1.3s ease-in;
-  transform-origin: 50% 42%;
+    transform 1.25s cubic-bezier(0.5, 0, 0.2, 1),
+    filter 1.15s ease-in,
+    opacity 1.1s ease-in;
+  transform-origin: 50% 24%;
 }
 
-.intro.zooming {
-  transform: scale(2.7);
-  filter: blur(16px) brightness(1.25);
+.intro.volando {
+  transform: scale(2.9);
+  filter: blur(15px) brightness(1.2);
   opacity: 0;
   pointer-events: none;
 }
 
-.landscape {
+/* ════════ Cielo ════════ */
+.stars {
+  position: absolute;
+  inset: 0;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #dfe8ff;
+  animation: twinkle ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.9; }
+}
+
+/* ════════ Luna ════════ */
+.luna {
+  position: absolute;
+  top: 13%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(120px, 34vw, 190px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fffdf2 0%, #f7ecc8 45%, #e8d6a0 100%);
+  box-shadow:
+    0 0 40px rgba(250, 238, 190, 0.55),
+    0 0 130px rgba(250, 238, 190, 0.3),
+    0 0 260px rgba(250, 238, 190, 0.15);
+  transition: box-shadow 0.9s ease, transform 0.9s ease;
+  animation: lunaLatido 7s ease-in-out infinite;
+}
+
+.luna.recibiendo {
+  box-shadow:
+    0 0 60px rgba(255, 246, 205, 0.95),
+    0 0 190px rgba(255, 240, 180, 0.55),
+    0 0 340px rgba(255, 236, 165, 0.3);
+  transform: translateX(-50%) scale(1.08);
+}
+
+.crater {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(190, 168, 115, 0.35), rgba(190, 168, 115, 0.12) 70%);
+}
+
+.c1 { width: 22%; height: 22%; top: 30%; left: 24%; }
+.c2 { width: 14%; height: 14%; top: 58%; left: 55%; }
+.c3 { width: 10%; height: 10%; top: 24%; left: 62%; }
+
+@keyframes lunaLatido {
+  0%, 100% { box-shadow: 0 0 40px rgba(250, 238, 190, 0.55), 0 0 130px rgba(250, 238, 190, 0.3), 0 0 260px rgba(250, 238, 190, 0.15); }
+  50% { box-shadow: 0 0 52px rgba(250, 238, 190, 0.7), 0 0 160px rgba(250, 238, 190, 0.38), 0 0 300px rgba(250, 238, 190, 0.2); }
+}
+
+/* ════════ Paisaje ════════ */
+.bayou {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-/* Velo suave para legibilidad del texto */
-.veil {
+/* ════════ Luciérnagas ════════ */
+.luci {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  z-index: 3;
+  will-change: transform;
+}
+
+.l1 { left: 26%; top: 55%; animation: vagar1 9s ease-in-out infinite; }
+.l2 { left: 68%; top: 62%; animation: vagar2 11s ease-in-out infinite; }
+
+.cuerpo {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 40%, #fffbe8 0%, #ffe9a0 45%, #e8b840 100%);
+  box-shadow:
+    0 0 8px 2px rgba(255, 238, 170, 0.95),
+    0 0 22px 6px rgba(255, 224, 130, 0.55),
+    0 0 48px 14px rgba(255, 210, 100, 0.22);
+  animation: parpadeo 2.8s ease-in-out infinite;
+}
+
+.l2 .cuerpo { animation-delay: 1.3s; }
+
+.halo {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 232, 150, 0.28) 0%, transparent 70%);
+  animation: parpadeo 2.8s ease-in-out infinite;
+}
+
+.l2 .halo { animation-delay: 1.3s; }
+
+.alas {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(59, 23, 87, 0.1) 0%, rgba(45, 14, 40, 0.42) 100%),
-    linear-gradient(180deg, rgba(59, 23, 87, 0.25) 0%, transparent 30%, transparent 62%, rgba(30, 8, 30, 0.6) 100%);
-}
-
-.content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 24px;
-}
-
-/* ---------- Las manos ---------- */
-.hands-btn {
-  position: relative;
-  background: none;
-  border: none;
-  padding: 0;
-  margin-bottom: 30px;
-  animation: floatHands 5s ease-in-out infinite;
-}
-
-.hands {
-  display: block;
-  width: clamp(220px, 62vw, 320px);
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 4px solid rgba(255, 243, 214, 0.85);
-  box-shadow:
-    0 0 0 8px rgba(255, 205, 135, 0.12),
-    0 0 60px rgba(255, 190, 120, 0.45),
-    0 18px 50px rgba(30, 8, 30, 0.55);
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-}
-
-.hands-btn:active .hands {
-  transform: scale(0.96);
-}
-
-.hands-glow {
-  position: absolute;
-  inset: -22px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 205, 135, 0.35) 0%, transparent 70%);
-  animation: pulseGlow 3.2s ease-in-out infinite;
   pointer-events: none;
 }
 
-.tap-hint {
+.alas i {
   position: absolute;
-  bottom: -6px;
-  right: -4px;
-  font-family: var(--font-script);
-  font-size: 1.15rem;
-  color: #fff3d6;
-  background: rgba(74, 15, 30, 0.72);
-  padding: 5px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 243, 214, 0.4);
-  box-shadow: 0 4px 14px rgba(30, 8, 30, 0.45);
-  animation: pulseGlow 2.6s ease-in-out infinite;
+  top: -2px;
+  width: 9px;
+  height: 5px;
+  border-radius: 50% 50% 50% 50%;
+  background: rgba(220, 235, 255, 0.5);
+  filter: blur(0.6px);
+  transform-origin: bottom center;
 }
 
-/* ---------- Frase ---------- */
+.alas i:first-child { left: -7px; animation: aletearIzq 0.14s linear infinite; }
+.alas i:last-child { right: -7px; animation: aletearDer 0.14s linear infinite; animation-delay: 0.07s; }
+
+@keyframes aletearIzq {
+  0%, 100% { opacity: 0.75; transform: rotate(-32deg) scaleY(1); }
+  50% { opacity: 0.3; transform: rotate(-46deg) scaleY(0.3); }
+}
+
+@keyframes aletearDer {
+  0%, 100% { opacity: 0.75; transform: rotate(32deg) scaleY(1); }
+  50% { opacity: 0.3; transform: rotate(46deg) scaleY(0.3); }
+}
+
+@keyframes parpadeo {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes vagar1 {
+  0%, 100% { translate: 0 0; }
+  25% { translate: 34px -46px; }
+  50% { translate: -22px -18px; }
+  75% { translate: 26px 22px; }
+}
+
+@keyframes vagar2 {
+  0%, 100% { translate: 0 0; }
+  30% { translate: -40px -30px; }
+  55% { translate: 18px -52px; }
+  80% { translate: -28px 16px; }
+}
+
+/* ════════ Invitación ════════ */
+.content {
+  position: relative;
+  z-index: 4;
+  text-align: center;
+  padding: 0 24px calc(52px + env(safe-area-inset-bottom, 0px));
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.intro.volando .content {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
 .invite {
   margin: 0;
-  font-size: clamp(2.2rem, 8vw, 3.2rem);
+  font-size: clamp(2.1rem, 8vw, 3.1rem);
   line-height: 1.15;
-  color: #fff3d6;
+  color: #f7ecc8;
   text-shadow:
-    0 0 22px rgba(255, 190, 120, 0.5),
-    0 3px 18px rgba(30, 8, 30, 0.65);
+    0 0 24px rgba(250, 238, 190, 0.4),
+    0 3px 18px rgba(4, 6, 20, 0.8);
 }
 
 .invite-sub {
   margin: 12px 0 0;
   font-family: var(--font-script);
   font-size: clamp(1.3rem, 4.5vw, 1.7rem);
-  color: #ffc9a0;
-  text-shadow: 0 2px 14px rgba(30, 8, 30, 0.6);
+  color: #b9c6ee;
+  text-shadow: 0 2px 14px rgba(4, 6, 20, 0.8);
 }
 
-/* ---------- Animaciones ---------- */
-@keyframes floatHands {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+.tap-hint {
+  margin: 26px 0 0;
+  display: inline-block;
+  font-family: var(--font-script);
+  font-size: 1.15rem;
+  color: #f7ecc8;
+  background: rgba(10, 16, 44, 0.55);
+  padding: 6px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(247, 236, 200, 0.35);
+  animation: latidoHint 2.6s ease-in-out infinite;
 }
 
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.55; }
+@keyframes latidoHint {
+  0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
 
+/* ════════ Móvil ════════ */
 @media (max-width: 640px) {
   .content {
-    padding: 18px 16px;
+    padding: 0 18px calc(40px + env(safe-area-inset-bottom, 0px));
   }
 
-  .hands-btn {
-    margin-bottom: 22px;
-  }
-
-  .invite-sub {
-    padding: 0 10px;
-  }
-}
-
-@media (max-height: 620px) {
-  .hands {
-    width: clamp(180px, 46vw, 240px);
-  }
-
-  .hands-btn {
-    margin-bottom: 14px;
-  }
+  .l1 { left: 22%; top: 52%; }
+  .l2 { left: 72%; top: 60%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hands-btn,
-  .hands-glow,
-  .tap-hint {
-    animation: none;
+  .luci,
+  .cuerpo,
+  .halo,
+  .alas i,
+  .star,
+  .tap-hint,
+  .luna {
+    animation: none !important;
   }
 
   .intro {
