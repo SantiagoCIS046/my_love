@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import confetti from 'canvas-confetti'
 import { cartaFinal, firmaCarta } from '../data/content'
-import { config } from '../data/config'
+import disneyCastleImg from '../assets/disney_castle.jpg'
 
 const etapa = ref('entrada') // entrada -> carta -> final
 const arcCanvasRef = ref(null)
@@ -14,20 +14,9 @@ const heartShape = confetti.shapeFromPath({
 
 const colors = ['#fde047', '#f472b6', '#67e8f9', '#ffffff', '#e879f9', '#fbbf24']
 let fireworksTimer = null
-let starAnimTimer = null
-
-// Estrellas titilantes en el cielo nocturno
-const stars = Array.from({ length: 85 }, (_, s) => {
-  const r = ((s * 9301 + 49297) % 233280) / 233280
-  const r2 = ((s * 4801 + 1723) % 10000) / 10000
-  return {
-    left: (r * 100).toFixed(2) + '%',
-    top: (r2 * 68).toFixed(2) + '%',
-    size: (1 + r2 * 2.2).toFixed(1) + 'px',
-    animationDelay: (r2 * 4).toFixed(2) + 's',
-    animationDuration: (2.5 + r * 3.5).toFixed(2) + 's',
-  }
-})
+let starCycleTimer = null
+let animId = null
+let starParticles = []
 
 function abrirCarta() {
   etapa.value = 'carta'
@@ -35,16 +24,12 @@ function abrirCarta() {
 
 function granFinal() {
   etapa.value = 'final'
-  // Disparar la estrella fugaz icónica de Disney tras 0.6s
+  // Lanzar la intro cinemática de la estrella de Disney
   setTimeout(() => {
     lanzarEstrellaDisney()
     iniciarFuegosDisney()
-  }, 600)
+  }, 400)
 }
-
-// ── ESTRELLA FUGAZ DISNEY & POLVO DE HADAS (Stardust) ──
-let animId = null
-let starParticles = []
 
 function lanzarEstrellaDisney() {
   starActive.value = true
@@ -62,20 +47,18 @@ function initStardustCanvas() {
   }
   resize()
 
-  // Duración del arco: 3.2s
   const startTime = performance.now()
-  const duration = 3200
+  const duration = 3400 // 3.4s para completar el arco majestuoso
 
-  // Parábola del arco Disney sobre el castillo
-  // t va de 0 a 1
+  // Parábola icónica de Disney sobre la aguja del castillo
   function getArcPos(t) {
     const w = canvas.width
     const h = canvas.height
-    // Inicio: 8% ancho, 75% alto | Vértice: 50% ancho, 14% alto | Fin: 92% ancho, 75% alto
-    const p0 = { x: w * 0.08, y: h * 0.72 }
-    const p1 = { x: w * 0.32, y: h * 0.12 }
-    const p2 = { x: w * 0.68, y: h * 0.12 }
-    const p3 = { x: w * 0.92, y: h * 0.72 }
+    // Inicio: 12% ancho, 64% alto | Cima del arco: 50% ancho, 11% alto | Fin: 88% ancho, 62% alto
+    const p0 = { x: w * 0.12, y: h * 0.64 }
+    const p1 = { x: w * 0.32, y: h * 0.08 }
+    const p2 = { x: w * 0.68, y: h * 0.08 }
+    const p3 = { x: w * 0.88, y: h * 0.62 }
 
     const cx = 3 * (p1.x - p0.x)
     const bx = 3 * (p2.x - p1.x) - cx
@@ -97,44 +80,54 @@ function initStardustCanvas() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Si la estrella sigue en vuelo, generar chispas en su posición actual
+    // Si la estrella viaja, dibujar su núcleo de luz y generar polvo de hadas
     if (t < 1) {
       const pos = getArcPos(t)
 
-      // Cabeza brillante de la estrella
+      // Núcleo ultrabrillante
       ctx.save()
-      ctx.shadowBlur = 25
-      ctx.shadowColor = '#fffdf0'
+      ctx.shadowBlur = 30
+      ctx.shadowColor = '#ffffff'
       ctx.fillStyle = '#ffffff'
       ctx.beginPath()
-      ctx.arc(pos.x, pos.y, 4.5, 0, Math.PI * 2)
+      ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2)
       ctx.fill()
 
-      // Destello exterior dorado
-      ctx.shadowBlur = 40
-      ctx.shadowColor = '#ffe26a'
-      ctx.fillStyle = 'rgba(255, 240, 150, 0.6)'
+      // Resplandor dorado / cian
+      ctx.shadowBlur = 45
+      ctx.shadowColor = '#ffdf7a'
+      ctx.fillStyle = 'rgba(255, 240, 160, 0.7)'
       ctx.beginPath()
-      ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2)
+      ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2)
       ctx.fill()
+
+      // Cruz de destello
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.moveTo(pos.x - 16, pos.y)
+      ctx.lineTo(pos.x + 16, pos.y)
+      ctx.moveTo(pos.x, pos.y - 16)
+      ctx.lineTo(pos.x, pos.y + 16)
+      ctx.stroke()
       ctx.restore()
 
-      // Spawn de partículas de estela (polvo de hadas)
-      for (let i = 0; i < 4; i++) {
+      // Emisión de polvo de hadas (Tinkerbell stardust)
+      for (let i = 0; i < 6; i++) {
         starParticles.push({
-          x: pos.x + (Math.random() - 0.5) * 6,
-          y: pos.y + (Math.random() - 0.5) * 6,
-          vx: (Math.random() - 0.5) * 1.5,
-          vy: Math.random() * 1.2 + 0.4,
-          size: Math.random() * 2.8 + 1,
+          x: pos.x + (Math.random() - 0.5) * 8,
+          y: pos.y + (Math.random() - 0.5) * 8,
+          vx: (Math.random() - 0.5) * 1.6,
+          vy: Math.random() * 1.4 + 0.3,
+          size: Math.random() * 3.2 + 1,
           alpha: 1,
-          decay: 0.008 + Math.random() * 0.012,
-          color: Math.random() > 0.35 ? '#fffae0' : (Math.random() > 0.5 ? '#93e8ff' : '#ffd060'),
+          decay: 0.007 + Math.random() * 0.012,
+          color: Math.random() > 0.4 ? '#fffde8' : (Math.random() > 0.5 ? '#7de5ff' : '#ffcf4d'),
         })
       }
     }
 
-    // Dibujar y actualizar partículas
+    // Actualizar y dibujar partículas
     for (let i = starParticles.length - 1; i >= 0; i--) {
       const p = starParticles[i]
       p.x += p.vx
@@ -149,7 +142,7 @@ function initStardustCanvas() {
 
       ctx.save()
       ctx.globalAlpha = p.alpha
-      ctx.shadowBlur = 8
+      ctx.shadowBlur = 10
       ctx.shadowColor = p.color
       ctx.fillStyle = p.color
       ctx.beginPath()
@@ -161,10 +154,10 @@ function initStardustCanvas() {
     if (t < 1 || starParticles.length > 0) {
       animId = requestAnimationFrame(frame)
     } else {
-      // Repetir el arco mágico cada 14 segundos para mantener la magia viva
-      starAnimTimer = setTimeout(() => {
+      // Repetir el arco cada 12 segundos para mantener el show activo
+      starCycleTimer = setTimeout(() => {
         if (etapa.value === 'final') lanzarEstrellaDisney()
-      }, 10000)
+      }, 9000)
     }
   }
 
@@ -173,9 +166,9 @@ function initStardustCanvas() {
 
 function burstDisney(x, y) {
   confetti({
-    particleCount: 30,
-    spread: 80,
-    startVelocity: 32,
+    particleCount: 32,
+    spread: 85,
+    startVelocity: 34,
     origin: { x, y },
     colors,
     shapes: [heartShape],
@@ -187,20 +180,39 @@ function burstDisney(x, y) {
 }
 
 function iniciarFuegosDisney() {
-  // Destellos mágicos suaves en el cielo a los lados del castillo
   fireworksTimer = setInterval(() => {
-    if (Math.random() > 0.3) {
+    if (Math.random() > 0.35) {
       burstDisney(
-        Math.random() > 0.5 ? 0.15 + Math.random() * 0.22 : 0.63 + Math.random() * 0.22,
-        0.18 + Math.random() * 0.28
+        Math.random() > 0.5 ? 0.16 + Math.random() * 0.2 : 0.64 + Math.random() * 0.2,
+        0.18 + Math.random() * 0.25
       )
     }
-  }, 1400)
+  }, 1600)
+}
+
+function handlePointer(e) {
+  if (etapa.value !== 'final') return
+  const x = e.clientX || (e.touches && e.touches[0]?.clientX)
+  const y = e.clientY || (e.touches && e.touches[0]?.clientY)
+  if (x != null && y != null && Math.random() > 0.3) {
+    for (let i = 0; i < 2; i++) {
+      starParticles.push({
+        x: x + (Math.random() - 0.5) * 10,
+        y: y + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5 - 0.5,
+        size: Math.random() * 2.5 + 1.2,
+        alpha: 0.9,
+        decay: 0.02,
+        color: Math.random() > 0.5 ? '#fff4b8' : '#7fe4ff',
+      })
+    }
+  }
 }
 
 onBeforeUnmount(() => {
   if (fireworksTimer) clearInterval(fireworksTimer)
-  if (starAnimTimer) clearTimeout(starAnimTimer)
+  if (starCycleTimer) clearTimeout(starCycleTimer)
   if (animId) cancelAnimationFrame(animId)
 })
 </script>
@@ -232,184 +244,33 @@ onBeforeUnmount(() => {
     </div>
   </section>
 
-  <!-- ════════ Etapa 3: final estilo Disney ════════ -->
-  <section v-else class="scene disney-stage">
-    <!-- Fondo de cielo estrellado con gradiente Disney crepuscular -->
-    <div class="stars" aria-hidden="true">
-      <span
-        v-for="(s, i) in stars"
-        :key="i"
-        class="star"
-        :style="{
-          left: s.left,
-          top: s.top,
-          width: s.size,
-          height: s.size,
-          animationDelay: s.animationDelay,
-          animationDuration: s.animationDuration,
-        }"
-      ></span>
+  <!-- ════════ Etapa 3: FINAL ÉPICO DISNEY (Intro de película) ════════ -->
+  <section
+    v-else
+    class="scene epic-disney-scene"
+    @pointermove="handlePointer"
+    @touchmove.passive="handlePointer"
+  >
+    <!-- Fondo fotográfico hiperrealista del Castillo de Disney con movimiento de cámara (estilo video) -->
+    <div class="disney-video-bg">
+      <img
+        :src="disneyCastleImg"
+        alt="Castillo de Disney con fuegos artificiales y arco de estrella fugaz"
+        class="disney-castle-photo"
+      />
     </div>
 
-    <!-- Luna mágica -->
-    <div class="moon" aria-hidden="true"></div>
+    <!-- Bruma y resplandor mágico sobre el lago -->
+    <div class="disney-aura" aria-hidden="true"></div>
 
-    <!-- Canvas para la estela de polvo de hadas de la estrella fugaz -->
-    <canvas ref="arcCanvasRef" class="stardust-canvas" aria-hidden="true"></canvas>
+    <!-- Canvas para la estrella fugaz en vivo y polvo de hadas de Campanita -->
+    <canvas ref="arcCanvasRef" class="disney-fx-canvas" aria-hidden="true"></canvas>
 
-    <!-- ══ EL ICÓNICO CASTILLO DE DISNEY CON ILUMINACIÓN MÁGICA ══ -->
-    <div class="disney-castle-wrap" aria-hidden="true">
-      <!-- Aura de luz detrás del castillo -->
-      <div class="castle-backlight"></div>
-
-      <!-- Silueta vectorial detallada del castillo de Cenicienta / Disney -->
-      <svg
-        class="disney-castle-svg"
-        viewBox="0 0 1000 680"
-        preserveAspectRatio="xMidYMax meet"
-      >
-        <defs>
-          <linearGradient id="castleGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#24143e" />
-            <stop offset="40%"  stop-color="#180e2f" />
-            <stop offset="100%" stop-color="#0b0617" />
-          </linearGradient>
-
-          <linearGradient id="castleHighlight" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stop-color="#3c2062" />
-            <stop offset="50%"  stop-color="#552f82" />
-            <stop offset="100%" stop-color="#24143e" />
-          </linearGradient>
-
-          <radialGradient id="windowLight" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stop-color="#fffce8" />
-            <stop offset="60%"  stop-color="#ffd56a" />
-            <stop offset="100%" stop-color="#e09520" />
-          </radialGradient>
-
-          <radialGradient id="portalLight" cx="50%" cy="75%" r="65%">
-            <stop offset="0%"   stop-color="#fff8d5" stop-opacity="0.9" />
-            <stop offset="45%"  stop-color="#f5c250" stop-opacity="0.6" />
-            <stop offset="100%" stop-color="#3c1550" stop-opacity="0" />
-          </radialGradient>
-
-          <filter id="windowGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <!-- ── Resplandor del portal central ── -->
-        <path d="M 450,680 L 450,565 C 450,530 550,530 550,565 L 550,680 Z" fill="url(#portalLight)" />
-
-        <!-- ── Silueta completa del Castillo de Disney ── -->
-        <g fill="url(#castleGrad)">
-          <!-- Base muralla exterior y almenas -->
-          <rect x="180" y="610" width="640" height="70" />
-          <!-- Almenas inferiores -->
-          <path d="
-            M 180,610 L 180,590 L 210,590 L 210,610 L 230,610 L 230,590 L 260,590 L 260,610
-            L 280,610 L 280,590 L 310,590 L 310,610 L 330,610 L 330,590 L 360,590 L 360,610
-            L 640,610 L 640,590 L 670,590 L 670,610 L 690,610 L 690,590 L 720,590 L 720,610
-            L 740,610 L 740,590 L 770,590 L 770,610 L 790,610 L 790,590 L 820,590 L 820,610 Z
-          " />
-
-          <!-- Muralla media izquierda y derecha -->
-          <rect x="250" y="520" width="130" height="90" />
-          <rect x="620" y="520" width="130" height="90" />
-
-          <!-- Torre lateral lejana izquierda -->
-          <rect x="190" y="470" width="45" height="140" />
-          <polygon points="180,470 212,370 245,470" fill="url(#castleHighlight)" />
-          <polygon points="212,370 212,350 220,358" fill="#ffd56a" />
-
-          <!-- Torre lateral lejana derecha -->
-          <rect x="765" y="470" width="45" height="140" />
-          <polygon points="755,470 788,370 820,470" fill="url(#castleHighlight)" />
-          <polygon points="788,370 788,350 796,358" fill="#ffd56a" />
-
-          <!-- Torre media izquierda (grande) -->
-          <rect x="280" y="410" width="65" height="180" />
-          <polygon points="270,410 312,280 355,410" fill="url(#castleHighlight)" />
-          <polygon points="312,280 312,258 322,266" fill="#ffd56a" />
-
-          <!-- Torre media derecha (grande) -->
-          <rect x="655" y="410" width="65" height="180" />
-          <polygon points="645,410 688,280 730,410" fill="url(#castleHighlight)" />
-          <polygon points="688,280 688,258 698,266" fill="#ffd56a" />
-
-          <!-- Cuerpo central inferior -->
-          <rect x="360" y="460" width="280" height="150" />
-
-          <!-- Arbotantes laterales (flying buttresses icónicos) -->
-          <path d="M 360,520 Q 330,470 340,430 L 350,430 Q 345,480 360,500 Z" fill="url(#castleHighlight)" />
-          <path d="M 640,520 Q 670,470 660,430 L 650,430 Q 655,480 640,500 Z" fill="url(#castleHighlight)" />
-
-          <!-- Segundo nivel central -->
-          <rect x="400" y="380" width="200" height="120" />
-          <!-- Almenas del segundo nivel -->
-          <path d="
-            M 390,380 L 390,365 L 415,365 L 415,380 L 430,380 L 430,365 L 455,365 L 455,380
-            L 545,380 L 545,365 L 570,365 L 570,380 L 585,380 L 585,365 L 610,365 L 610,380 Z
-          " />
-
-          <!-- Torre central media izquierda y derecha -->
-          <rect x="415" y="290" width="40" height="90" />
-          <polygon points="408,290 435,195 462,290" fill="url(#castleHighlight)" />
-
-          <rect x="545" y="290" width="40" height="90" />
-          <polygon points="538,290 565,195 592,290" fill="url(#castleHighlight)" />
-
-          <!-- ══ GRAN TORRE CENTRAL PRINCIPAL DE CENICIENTA ══ -->
-          <rect x="465" y="240" width="70" height="160" />
-          <!-- Galería circular de la aguja -->
-          <rect x="455" y="235" width="90" height="14" rx="3" />
-          <!-- Aguja cónica monumental -->
-          <polygon points="450,235 500,45 550,235" fill="url(#castleHighlight)" />
-          <!-- Banderín ondeando en la cima más alta -->
-          <polygon points="500,45 500,20 522,30 500,38" fill="#ffe26a" />
-
-          <!-- Torrecillas adosadas a la aguja central -->
-          <rect x="472" y="200" width="12" height="40" />
-          <polygon points="470,200 478,160 486,200" fill="#4d2876" />
-          <rect x="516" y="200" width="12" height="40" />
-          <polygon points="514,200 522,160 530,200" fill="#4d2876" />
-
-          <!-- Portal principal en arco -->
-          <path d="M 465,680 L 465,580 C 465,550 535,550 535,580 L 535,680 Z" fill="#07030e" />
-          <path d="M 470,680 L 470,582 C 470,556 530,556 530,582 L 530,680 Z" fill="#ffca58" opacity="0.85" filter="url(#windowGlow)" />
-        </g>
-
-        <!-- ── Ventanas cálidas iluminadas con velas ── -->
-        <g fill="url(#windowLight)" filter="url(#windowGlow)">
-          <!-- Ventana aguja principal -->
-          <path d="M 495,190 C 495,182 505,182 505,190 L 505,210 L 495,210 Z" />
-          <!-- Ventana gran torre central -->
-          <path d="M 490,290 C 490,278 510,278 510,290 L 510,325 L 490,325 Z" />
-          <!-- Ventanas torres intermedias -->
-          <path d="M 428,320 C 428,312 442,312 442,320 L 442,345 L 428,345 Z" />
-          <path d="M 558,320 C 558,312 572,312 572,320 L 572,345 L 558,345 Z" />
-          <!-- Ventanas torres laterales grandes -->
-          <path d="M 305,445 C 305,435 320,435 320,445 L 320,475 L 305,475 Z" />
-          <path d="M 680,445 C 680,435 695,435 695,445 L 695,475 L 680,475 Z" />
-          <!-- Ventanas torres lejanas -->
-          <path d="M 205,500 C 205,492 218,492 218,500 L 218,525 L 205,525 Z" />
-          <path d="M 780,500 C 780,492 793,492 793,500 L 793,525 L 780,525 Z" />
-          <!-- Ventanas cuerpo medio -->
-          <circle cx="475" cy="425" r="7" />
-          <circle cx="525" cy="425" r="7" />
-        </g>
-      </svg>
-    </div>
-
-    <!-- ══ TEXTO FINAL ROMÁNTICO ESTILO DISNEY ══ -->
-    <div class="finale-text">
-      <p class="finale-script">Y así, después de tanto amor…</p>
-      <h1 class="finale-title">Y vivieron felices<br />para siempre</h1>
-      <p class="finale-sub">El fin… de esta carta. Nunca de nosotros. ♾️</p>
+    <!-- ══ TEXTO FINAL CINEMÁTICO DISNEY ══ -->
+    <div class="disney-text-overlay">
+      <p class="disney-prelude">Y así, después de tanto amor…</p>
+      <h1 class="disney-main-title">Y vivieron felices<br />para siempre</h1>
+      <p class="disney-closure">El fin… de esta carta. Nunca de nosotros. <span class="infinity">♾️</span></p>
     </div>
   </section>
 </template>
@@ -495,154 +356,154 @@ h1 {
 }
 
 /* ──────────────────────────────────────────────────────────
-   ETAPA 3: FINAL DISNEY AUTÉNTICO
+   ETAPA 3: FINAL ÉPICO DISNEY (Estilo video / intro de cine)
 ────────────────────────────────────────────────────────── */
-.disney-stage {
+.epic-disney-scene {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(ellipse at 50% 90%, rgba(240, 150, 170, 0.4) 0%, rgba(95, 45, 125, 0.3) 45%, transparent 70%),
-    linear-gradient(180deg, #070924 0%, #12143d 35%, #25164d 68%, #421844 100%);
-  overflow: hidden;
-  position: relative;
+  background: #030514;
 }
 
-/* Canvas del Polvo de Hadas y Estrella Fugaz */
-.stardust-canvas {
+/* Fondo cinemático del castillo con movimiento de video (Ken Burns) */
+.disney-video-bg {
   position: absolute;
-  inset: 0;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.disney-castle-photo {
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: 15;
+  object-fit: cover;
+  object-position: 50% 45%;
+  display: block;
+  animation: disneyVideoCam 28s ease-in-out infinite alternate;
+  transform-origin: 50% 40%;
 }
 
-/* Luna llena Disney */
-.moon {
+@keyframes disneyVideoCam {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.06) translate3d(-0.6%, -0.4%, 0);
+  }
+  100% {
+    transform: scale(1.03) translate3d(0.5%, 0.3%, 0);
+  }
+}
+
+/* Bruma sutil y halo de luz en la base */
+.disney-aura {
   position: absolute;
-  top: 8%;
-  right: 12%;
-  width: clamp(65px, 9vw, 95px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 35%, #ffffff 0%, #fff6d6 55%, #f0d588 100%);
-  box-shadow:
-    0 0 35px rgba(255, 245, 200, 0.6),
-    0 0 90px rgba(255, 240, 180, 0.3);
-  animation: moonFade 2s ease 0.3s both;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 70%),
+              linear-gradient(to top, rgba(3, 5, 20, 0.4) 0%, transparent 40%);
+  pointer-events: none;
   z-index: 2;
 }
 
-@keyframes moonFade {
-  from { opacity: 0; transform: translateY(-15px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Estrellas titilantes */
-.stars {
+/* Canvas del polvo de hadas y estrella fugaz */
+.disney-fx-canvas {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.star {
-  position: absolute;
-  border-radius: 50%;
-  background: #ffffff;
-  animation: starBlink linear infinite;
-}
-
-@keyframes starBlink {
-  0%, 100% { opacity: 0.2; transform: scale(0.9); }
-  50%      { opacity: 1;   transform: scale(1.4); }
-}
-
-/* ── CASTILLO DE DISNEY ── */
-.disney-castle-wrap {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(840px, 98vw);
-  height: clamp(280px, 48vh, 520px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 4;
-  pointer-events: none;
-  animation: castleRise 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes castleRise {
-  from { opacity: 0; transform: translateX(-50%) translateY(40px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.castle-backlight {
-  position: absolute;
-  bottom: 12%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 75%;
-  height: 65%;
-  background: radial-gradient(ellipse at 50% 60%, rgba(245, 200, 110, 0.35) 0%, rgba(200, 110, 170, 0.2) 50%, transparent 80%);
-  filter: blur(28px);
-  pointer-events: none;
-}
-
-.disney-castle-svg {
   width: 100%;
   height: 100%;
-  display: block;
-  filter: drop-shadow(0 -8px 25px rgba(25, 10, 45, 0.6));
-}
-
-/* ── TEXTO FINAL DISNEY ── */
-.finale-text {
-  position: relative;
-  z-index: 10;
-  text-align: center;
-  color: #fff9f0;
-  margin-top: -6vh;
-  animation: textReveal 2.5s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
   pointer-events: none;
+  z-index: 10;
 }
 
-@keyframes textReveal {
-  from { opacity: 0; transform: translateY(22px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+/* ── TEXTO FINAL DISNEY EN EL CIELO ── */
+.disney-text-overlay {
+  position: relative;
+  z-index: 20;
+  text-align: center;
+  color: #ffffff;
+  padding: 0 20px;
+  pointer-events: none;
+  margin-top: -12vh;
+  animation: disneyTextReveal 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
 }
 
-.finale-script {
-  margin: 0 0 10px;
+@keyframes disneyTextReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.disney-prelude {
+  margin: 0 0 12px;
   font-family: var(--font-script);
-  font-size: clamp(1.4rem, 3.8vw, 2.1rem);
-  color: #fce7f3;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+  font-size: clamp(1.5rem, 4vw, 2.3rem);
+  color: #fff1d6;
+  text-shadow:
+    0 0 20px rgba(255, 235, 170, 0.9),
+    0 2px 14px rgba(0, 0, 0, 0.9);
 }
 
-.finale-title {
+.disney-main-title {
   margin: 0;
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: clamp(2.8rem, 7.8vw, 5.4rem);
+  font-size: clamp(2.8rem, 8vw, 5.6rem);
   line-height: 1.15;
   color: #ffffff;
   text-shadow:
-    0 0 25px rgba(255, 235, 170, 0.9),
-    0 0 60px rgba(245, 190, 80, 0.5),
-    0 4px 25px rgba(0, 0, 0, 0.75);
+    0 0 35px rgba(255, 240, 180, 1),
+    0 0 75px rgba(255, 210, 110, 0.75),
+    0 4px 28px rgba(0, 0, 0, 0.95);
+  animation: titleGlowBeat 4s ease-in-out infinite alternate;
 }
 
-.finale-sub {
-  margin: 20px 0 0;
+@keyframes titleGlowBeat {
+  0% {
+    text-shadow:
+      0 0 30px rgba(255, 240, 180, 0.9),
+      0 0 65px rgba(255, 200, 90, 0.65),
+      0 4px 28px rgba(0, 0, 0, 0.95);
+  }
+  100% {
+    text-shadow:
+      0 0 45px rgba(255, 250, 210, 1),
+      0 0 95px rgba(255, 220, 120, 0.85),
+      0 4px 28px rgba(0, 0, 0, 0.95);
+  }
+}
+
+.disney-closure {
+  margin: 24px 0 0;
+  font-family: var(--font-serif);
   font-style: italic;
-  font-size: clamp(1rem, 2.6vw, 1.25rem);
-  color: rgba(255, 248, 235, 0.9);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
-  letter-spacing: 0.04em;
+  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+  letter-spacing: 0.05em;
+  color: rgba(255, 248, 235, 0.95);
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(255, 230, 160, 0.4);
+}
+
+.infinity {
+  display: inline-block;
+  font-style: normal;
+  color: #ffe685;
+  filter: drop-shadow(0 0 8px #ffe685);
 }
 
 /* ---------- Móvil ---------- */
@@ -668,32 +529,23 @@ h1 {
     padding: 13px 20px;
   }
 
-  .moon {
-    top: 6%;
-    right: 8%;
-  }
-
-  .disney-castle-wrap {
-    width: 100vw;
-    height: 40vh;
-  }
-
-  .finale-text {
-    margin-top: -14vh;
+  .disney-text-overlay {
+    margin-top: -18vh;
     padding: 0 16px;
   }
 
-  .finale-title {
-    font-size: clamp(2.3rem, 9vw, 3.2rem);
+  .disney-main-title {
+    font-size: clamp(2.4rem, 9.5vw, 3.4rem);
+  }
+
+  .disney-prelude {
+    font-size: 1.4rem;
   }
 }
 
 @media (max-height: 640px) {
-  .disney-castle-wrap {
-    height: 32vh;
-  }
-  .finale-text {
-    margin-top: -10vh;
+  .disney-text-overlay {
+    margin-top: -12vh;
   }
 }
 </style>
