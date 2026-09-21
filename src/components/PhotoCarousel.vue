@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { photos } from '../data/content'
+import TiltedCard from './TiltedCard.vue'
 
 const emit = defineEmits(['next'])
 
@@ -29,26 +30,33 @@ function scrollBy(dir) {
       <button class="arrow left" aria-label="Anterior" @click="scrollBy(-1)">‹</button>
 
       <div ref="track" class="track">
-        <article
+        <TiltedCard
           v-for="(p, i) in photos"
           :key="i"
-          class="polaroid"
-          :style="{ '--tilt': (i % 2 === 0 ? -1 : 1) * (1.5 + (i % 3)) + 'deg' }"
+          class="polaroid-tilt"
+          :rotate-amplitude="14"
+          :scale-on-hover="1.04"
+          :glare="true"
         >
-          <div class="photo-frame">
-            <img
-              v-if="!failed.has(i)"
-              :src="p.src"
-              :alt="p.caption"
-              loading="lazy"
-              @error="onImgError(i)"
-            />
-            <div v-else class="placeholder" :style="{ background: p.gradient }">
-              <span>Aquí va<br />nuestra foto</span>
+          <article
+            class="polaroid"
+            :style="{ '--tilt': (i % 2 === 0 ? -1 : 1) * (1.5 + (i % 3)) + 'deg' }"
+          >
+            <div class="photo-frame">
+              <img
+                v-if="!failed.has(i)"
+                :src="p.src"
+                :alt="p.caption"
+                loading="lazy"
+                @error="onImgError(i)"
+              />
+              <div v-else class="placeholder" :style="{ background: p.gradient }">
+                <span>Aquí va<br />nuestra foto</span>
+              </div>
             </div>
-          </div>
-          <p class="caption">{{ p.caption }}</p>
-        </article>
+            <p class="caption">{{ p.caption }}</p>
+          </article>
+        </TiltedCard>
       </div>
 
       <button class="arrow right" aria-label="Siguiente" @click="scrollBy(1)">›</button>
@@ -121,9 +129,12 @@ h1 {
   cursor: grabbing;
 }
 
-.polaroid {
-  scroll-snap-align: center;
+.polaroid-tilt {
   flex: 0 0 auto;
+  scroll-snap-align: center;
+}
+
+.polaroid {
   width: clamp(220px, 26vw, 280px);
   background: #fff;
   padding: 14px 14px 18px;
@@ -132,7 +143,7 @@ h1 {
     0 2px 4px rgba(74, 15, 30, 0.12),
     0 16px 34px rgba(74, 15, 30, 0.18);
   transform: rotate(var(--tilt));
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+  transition: box-shadow 0.35s ease;
 }
 
 .polaroid:hover {

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { photos, frases } from '../data/content'
+import TiltedCard from './TiltedCard.vue'
 
 const emit = defineEmits(['next'])
 
@@ -55,18 +56,24 @@ function onImgError(i) {
     <!-- Recuerdo revelado -->
     <div v-else class="memory fade-up">
       <div class="memory-card" :key="photoIdx + '-' + fraseIdx">
-        <div class="photo-wrap">
-          <img
-            v-if="!failed.has(photoIdx)"
-            :src="photo.src"
-            :alt="photo.caption"
-            @error="onImgError(photoIdx)"
-          />
-          <div v-else class="placeholder" :style="{ background: photo.gradient }">
-            <span>Nuestro recuerdo</span>
+        <TiltedCard
+          :rotate-amplitude="16"
+          :scale-on-hover="1.06"
+          :glare="true"
+        >
+          <div class="photo-wrap">
+            <img
+              v-if="!failed.has(photoIdx)"
+              :src="photo.src"
+              :alt="photo.caption"
+              @error="onImgError(photoIdx)"
+            />
+            <div v-else class="placeholder" :style="{ background: photo.gradient }">
+              <span>Nuestro recuerdo</span>
+            </div>
+            <span class="tape"></span>
           </div>
-          <span class="tape"></span>
-        </div>
+        </TiltedCard>
         <blockquote class="frase">“{{ frase }}”</blockquote>
       </div>
 
