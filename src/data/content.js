@@ -35,10 +35,16 @@ export const clausulas = [
 ]
 
 export const cartaFinal = [
-  'Mi amor,',
-  'Hoy miré hacia atrás y no pude creer todo lo que hemos construido juntos. Cada risa, cada abrazo apretado, cada plan de último minuto, cada "¿qué comemos?" se convirtió en un ladrillo de esto que llamamos nosotros.',
-  'No tengo la poesía de los grandes escritores, pero tengo algo mejor: te tengo a ti, y tengo la certeza de que quiero seguir teniéndote por muchos años más.',
-  'Gracias por tu paciencia, por tu risa que arregla mis días, por quedarte cuando era más fácil irse, y por hacer que amar sea tan sencillo.',
-  'Este pequeño regalo es solo una carta. Pero detrás de cada línea hay un corazón que late tu nombre.',
-  'Feliz aniversario, mi amor. Y que lleguen muchos, muchos más.',
+  'Mi negrita,',
+  'Hoy miré hacia atrás y me llena de emoción pensar en todo lo que hemos vivido. Ya son 5 años de amor, de grandes momentos y de construir juntos una historia increíble.',
+  'Todavía tengo grabada en la mente la primera vez que nos conocimos. Desde ese día, descubrirte ha sido el viaje más hermoso. Incluso hoy, después de todo este tiempo, solo verte sigue siendo algo increíble para mí; me llena el pecho de orgullo y se siente irreal tener tanta suerte, porque estar a tu lado es, sin duda, el lugar más maravilloso en el que podría estar.',
+  'Cada risa, cada abrazo apretado, cada plan de último minuto y cada "¿qué comemos?" se ha convertido en un pilar de esto tan nuestro. No tengo la poesía de los grandes escritores, pero tengo la mayor de las certezas: te tengo a ti. Eres una mujer excepcional y quiero recordarte hoy lo inmensamente feliz que me hace caminar de tu mano.',
+  'Gracias por tu paciencia, por esa risa tuya que tiene el poder de arreglar cualquiera de mis días, por ser mi refugio constante, y por hacer que amarte sea lo más sencillo y natural del mundo.',
+  'Esta pequeña sorpresa es solo un detalle, pero detrás de cada foto, de cada recuerdo y de cada línea, hay un corazón que late tu nombre y que está profundamente orgulloso de lo que hemos logrado juntos.',
+  'Felices 5 años, mi negrita. Y que la vida nos regale muchos, muchos más.',
 ]
+
+export const firmaCarta = {
+  despedida: 'Con todo mi amor,',
+  autor: 'Quien te ama con locura, tu negro, tu papi, tu ferrero roshe',
+}

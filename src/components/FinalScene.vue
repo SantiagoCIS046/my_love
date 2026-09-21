@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onBeforeUnmount } from 'vue'
 import confetti from 'canvas-confetti'
-import { cartaFinal } from '../data/content'
+import { cartaFinal, firmaCarta } from '../data/content'
 import { config } from '../data/config'
 
 const etapa = ref('entrada') // entrada -> carta -> final
@@ -92,8 +92,10 @@ onBeforeUnmount(() => {
       <p v-for="(par, i) in cartaFinal" :key="i" class="paragraph" :class="{ saludo: i === 0 }">
         {{ par }}
       </p>
-      <p class="firma script-title">Con todo mi amor,</p>
-      <p class="firma-nombre script-title">{{ config.yourName }}</p>
+      <div class="firma-block">
+        <p class="firma script-title">{{ firmaCarta.despedida }}</p>
+        <p class="firma-nombre">{{ firmaCarta.autor }}</p>
+      </div>
       <div class="letter-actions">
         <button class="btn-love" @click="granFinal">Y ahora, el gran final…&nbsp;✨</button>
       </div>
@@ -175,17 +177,25 @@ h1 {
   color: var(--wine);
 }
 
-.firma {
-  margin: 28px 0 0;
+.firma-block {
+  margin: 32px 0 0;
   text-align: right;
-  font-size: 1.8rem;
+}
+
+.firma {
+  margin: 0;
+  text-align: right;
+  font-size: clamp(1.6rem, 4.5vw, 2.1rem);
+  color: var(--wine);
 }
 
 .firma-nombre {
-  margin: 0;
+  margin: 8px 0 0;
   text-align: right;
-  font-size: clamp(2rem, 6vw, 2.6rem);
+  font-family: var(--font-script);
+  font-size: clamp(1.25rem, 3.6vw, 1.65rem);
   color: var(--wine);
+  line-height: 1.35;
 }
 
 .letter-actions {
