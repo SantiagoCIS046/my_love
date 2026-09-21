@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import FloatingHearts from './components/FloatingHearts.vue'
+import IntroScene from './components/IntroScene.vue'
 import EnvelopeScene from './components/EnvelopeScene.vue'
 import PhotoCarousel from './components/PhotoCarousel.vue'
 import LoveContract from './components/LoveContract.vue'
@@ -18,6 +19,19 @@ const scenes = [
 const current = ref(0)
 const isFinal = computed(() => current.value === scenes.length - 1)
 
+// Intro: al tocar las manos, la historia se prepara debajo (start)
+// y la intro se desmonta al terminar el zoom (next)
+const introMounted = ref(true)
+const historiaVisible = ref(false)
+
+function empezarHistoria() {
+  historiaVisible.value = true
+}
+
+function terminarIntro() {
+  introMounted.value = false
+}
+
 function next() {
   if (current.value < scenes.length - 1) current.value++
 }
@@ -28,14 +42,18 @@ function goTo(i) {
 </script>
 
 <template>
-  <FloatingHearts v-if="!isFinal" />
+  <!-- ══ Intro: manos + atardecer con escaleras ══ -->
+  <IntroScene v-if="introMounted" @start="empezarHistoria" @next="terminarIntro" />
 
-  <Transition name="scene" mode="out-in">
-    <component :is="scenes[current]" :key="current" @next="next" />
-  </Transition>
+  <template v-if="historiaVisible">
+    <FloatingHearts v-if="!isFinal" />
 
-  <!-- Progreso: un corazón por escena -->
-  <nav v-if="!isFinal" class="progress" aria-label="Progreso">
+    <Transition name="scene" mode="out-in">
+      <component :is="scenes[current]" :key="current" @next="next" />
+    </Transition>
+
+    <!-- Progreso: un corazón por escena -->
+    <nav v-if="!isFinal" class="progress" aria-label="Progreso">
     <button
       v-for="(s, i) in scenes"
       :key="i"
@@ -46,7 +64,8 @@ function goTo(i) {
     >
       ♥
     </button>
-  </nav>
+    </nav>
+  </template>
 </template>
 
 <style scoped>
