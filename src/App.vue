@@ -39,6 +39,12 @@ function next() {
 function goTo(i) {
   current.value = i
 }
+
+function reiniciar() {
+  current.value = 0
+  historiaVisible.value = false
+  introMounted.value = true
+}
 </script>
 
 <template>
@@ -49,7 +55,7 @@ function goTo(i) {
     <FloatingHearts v-if="!isFinal" />
 
     <Transition name="scene" mode="out-in">
-      <component :is="scenes[current]" :key="current" @next="next" />
+      <component :is="scenes[current]" :key="current" @next="next" @restart="reiniciar" />
     </Transition>
 
     <!-- Progreso: un corazón por escena -->

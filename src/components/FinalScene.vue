@@ -4,9 +4,14 @@ import confetti from 'canvas-confetti'
 import { cartaFinal, firmaCarta } from '../data/content'
 import disneyCastleImg from '../assets/disney_castle.jpg'
 
+const emit = defineEmits(['next', 'restart'])
 const etapa = ref('entrada') // entrada -> carta -> final
 const arcCanvasRef = ref(null)
 const starActive = ref(false)
+
+function reiniciar() {
+  emit('restart')
+}
 
 const heartShape = confetti.shapeFromPath({
   path: 'M167 72c19,-38 37,-56 75,-56 42,0 76,33 76,75 0,76 -76,151 -151,227 -76,-76 -151,-151 -151,-227 0,-42 33,-75 75,-75 38,0 57,18 76,56z',
@@ -271,6 +276,12 @@ onBeforeUnmount(() => {
       <p class="disney-prelude">Y así, después de tanto amor…</p>
       <h1 class="disney-main-title">Y vivieron felices<br />para siempre</h1>
       <p class="disney-closure">El fin… de esta carta. Nunca de nosotros. <span class="infinity">♾️</span></p>
+
+      <div class="replay-zone">
+        <button class="btn-replay" @click="reiniciar">
+          <span>↺</span> Volver al inicio
+        </button>
+      </div>
     </div>
   </section>
 </template>
@@ -504,6 +515,37 @@ h1 {
   font-style: normal;
   color: #ffe685;
   filter: drop-shadow(0 0 8px #ffe685);
+}
+
+.replay-zone {
+  margin-top: 24px;
+  pointer-events: auto;
+}
+
+.btn-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: #fff9e6;
+  background: rgba(12, 18, 40, 0.6);
+  border: 1px solid rgba(255, 230, 150, 0.45);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.btn-replay:hover {
+  transform: scale(1.05);
+  background: rgba(25, 35, 70, 0.8);
+  border-color: rgba(255, 240, 180, 0.85);
 }
 
 /* ---------- Móvil ---------- */
