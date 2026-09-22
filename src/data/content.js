@@ -5,14 +5,14 @@
 // ═══════════════════════════════════════════════════════════════
 
 export const photos = [
-  { src: '/photos/1.jpg', caption: 'Nuestro primer encuentro', gradient: 'linear-gradient(135deg,#f6a5c0,#c9556e)' },
-  { src: '/photos/2.jpg', caption: 'La primera vez que te dije te quiero', gradient: 'linear-gradient(135deg,#f8c471,#d35400)' },
-  { src: '/photos/3.jpg', caption: 'Ese viaje inolvidable', gradient: 'linear-gradient(135deg,#a8d8ea,#5b9bd5)' },
-  { src: '/photos/4.jpg', caption: 'Risas que no se acaban', gradient: 'linear-gradient(135deg,#d7bde2,#8e44ad)' },
-  { src: '/photos/5.jpg', caption: 'Bailando en la cocina', gradient: 'linear-gradient(135deg,#ffccd5,#ff7096)' },
-  { src: '/photos/6.jpg', caption: 'Atardeceres contigo', gradient: 'linear-gradient(135deg,#ffd89b,#c9584a)' },
-  { src: '/photos/7.jpg', caption: 'Tardes de peli y manta', gradient: 'linear-gradient(135deg,#b0e0c8,#3a7d5d)' },
-  { src: '/photos/8.jpg', caption: 'Y todo lo que viene…', gradient: 'linear-gradient(135deg,#f9d29d,#e8a4b4)' },
+  { src: '/photos/1.jpg', caption: 'El día que mi mundo empezó a tener tu cara', gradient: 'linear-gradient(135deg,#f6a5c0,#c9556e)' },
+  { src: '/photos/2.jpg', caption: 'Elegantes por fuera, completamente locos el uno por el otro por dentro', gradient: 'linear-gradient(135deg,#2c2c4a,#8b6e9e)' },
+  { src: '/photos/3.jpg', caption: 'Subimos hasta las nubes y te besé ahí, donde el cielo nos pertenecía', gradient: 'linear-gradient(135deg,#a8d8ea,#5b9bd5)' },
+  { src: '/photos/4.jpg', caption: 'Con el mundo entero a nuestros pies y sin querer mirar a ningún otro lado', gradient: 'linear-gradient(135deg,#74b9d4,#1a6a8a)' },
+  { src: '/photos/5.jpg', caption: 'Ese beso tuyo en mi mejilla que guarda más amor del que cabe en palabras', gradient: 'linear-gradient(135deg,#ffccd5,#ff7096)' },
+  { src: '/photos/6.jpg', caption: 'Tumbados, felices, riéndonos de nada y de todo al mismo tiempo', gradient: 'linear-gradient(135deg,#d7bde2,#8e44ad)' },
+  { src: '/photos/7.jpg', caption: 'Una noche cualquiera contigo que se convirtió en mi recuerdo favorito', gradient: 'linear-gradient(135deg,#ffd89b,#c9584a)' },
+  { src: '/photos/8.jpg', caption: 'Dos aviones, una misma dirección: siempre el uno hacia el otro', gradient: 'linear-gradient(135deg,#b0c8e0,#3a5d7d)' },
 ]
 
 export const frases = [
