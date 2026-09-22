@@ -440,17 +440,24 @@ h1 {
   z-index: 20;
   text-align: center;
   color: #ffffff;
-  padding: 0 20px;
+  padding: clamp(20px, 4vw, 32px) clamp(22px, 5vw, 40px);
+  max-width: min(760px, 92vw);
+  border-radius: 24px;
+  background: radial-gradient(ellipse at center, rgba(6, 10, 26, 0.82) 0%, rgba(6, 10, 26, 0.6) 65%, rgba(6, 10, 26, 0.25) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 235, 170, 0.3);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
   pointer-events: none;
-  margin-top: -12vh;
-  animation: disneyTextReveal 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+  animation: disneyTextReveal 2.4s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+  margin: 0 auto;
 }
 
 @keyframes disneyTextReveal {
   0% {
     opacity: 0;
-    transform: translateY(28px) scale(0.94);
-    filter: blur(8px);
+    transform: translateY(22px) scale(0.96);
+    filter: blur(6px);
   }
   100% {
     opacity: 1;
@@ -461,53 +468,42 @@ h1 {
 
 .disney-prelude {
   margin: 0 0 12px;
-  font-family: var(--font-script);
-  font-size: clamp(1.5rem, 4vw, 2.3rem);
-  color: #fff1d6;
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 2.8vw, 1.45rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffe699;
   text-shadow:
-    0 0 20px rgba(255, 235, 170, 0.9),
-    0 2px 14px rgba(0, 0, 0, 0.9);
+    0 2px 8px rgba(0, 0, 0, 0.95),
+    0 0 18px rgba(255, 220, 100, 0.6);
 }
 
 .disney-main-title {
   margin: 0;
-  font-family: var(--font-title);
-  font-weight: 400;
-  font-size: clamp(2.8rem, 8vw, 5.6rem);
-  line-height: 1.15;
-  color: #ffffff;
-  text-shadow:
-    0 0 35px rgba(255, 240, 180, 1),
-    0 0 75px rgba(255, 210, 110, 0.75),
-    0 4px 28px rgba(0, 0, 0, 0.95);
-  animation: titleGlowBeat 4s ease-in-out infinite alternate;
-}
-
-@keyframes titleGlowBeat {
-  0% {
-    text-shadow:
-      0 0 30px rgba(255, 240, 180, 0.9),
-      0 0 65px rgba(255, 200, 90, 0.65),
-      0 4px 28px rgba(0, 0, 0, 0.95);
-  }
-  100% {
-    text-shadow:
-      0 0 45px rgba(255, 250, 210, 1),
-      0 0 95px rgba(255, 220, 120, 0.85),
-      0 4px 28px rgba(0, 0, 0, 0.95);
-  }
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 5.8vw, 3.6rem);
+  line-height: 1.22;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #ffffff 0%, #fff6d8 45%, #ffd566 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 28px rgba(255, 220, 100, 0.65));
 }
 
 .disney-closure {
-  margin: 24px 0 0;
-  font-family: var(--font-serif);
+  margin: 18px 0 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+  font-size: clamp(1.05rem, 2.7vw, 1.35rem);
   letter-spacing: 0.05em;
-  color: rgba(255, 248, 235, 0.95);
+  color: #fff9eb;
   text-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.9),
-    0 0 20px rgba(255, 230, 160, 0.4);
+    0 2px 8px rgba(0, 0, 0, 0.95),
+    0 0 16px rgba(255, 230, 150, 0.5);
 }
 
 .infinity {
@@ -518,7 +514,7 @@ h1 {
 }
 
 .replay-zone {
-  margin-top: 24px;
+  margin-top: 22px;
   pointer-events: auto;
 }
 
@@ -526,26 +522,27 @@ h1 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 24px;
-  font-family: var(--font-serif);
-  font-size: 0.95rem;
-  font-style: italic;
-  letter-spacing: 0.04em;
+  padding: 10px 26px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #fff9e6;
-  background: rgba(12, 18, 40, 0.6);
-  border: 1px solid rgba(255, 230, 150, 0.45);
+  background: rgba(12, 18, 40, 0.7);
+  border: 1px solid rgba(255, 230, 150, 0.5);
   border-radius: 999px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 }
 
 .btn-replay:hover {
   transform: scale(1.05);
-  background: rgba(25, 35, 70, 0.8);
-  border-color: rgba(255, 240, 180, 0.85);
+  background: rgba(25, 35, 75, 0.85);
+  border-color: rgba(255, 240, 180, 0.9);
 }
 
 /* ---------- Móvil ---------- */
@@ -572,22 +569,27 @@ h1 {
   }
 
   .disney-text-overlay {
-    margin-top: -18vh;
-    padding: 0 16px;
+    padding: 18px 18px;
+    max-width: 94vw;
   }
 
   .disney-main-title {
-    font-size: clamp(2.4rem, 9.5vw, 3.4rem);
+    font-size: clamp(1.65rem, 6.5vw, 2.4rem);
   }
 
   .disney-prelude {
-    font-size: 1.4rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+  }
+
+  .disney-closure {
+    font-size: 0.98rem;
   }
 }
 
 @media (max-height: 640px) {
   .disney-text-overlay {
-    margin-top: -12vh;
+    padding: 14px 18px;
   }
 }
 </style>
